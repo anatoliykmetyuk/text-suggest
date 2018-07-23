@@ -5,8 +5,6 @@ Select a text you'd like to replace. Press middle mouse key. Enter your replacem
 First, install and familiarize yourself with [Hammerspoon](https://www.hammerspoon.org/). Next, run the commands below. **Don't forget to reload the Hammerspoon config after the procedure!**.
 
 ```bash
-HAMMERSPOON="~/.hammerspoon"
-
 # Install dependencies
 mkdir ~/.hammerspoon/lib
 cd ~/.hammerspoon/lib
