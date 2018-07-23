@@ -56,11 +56,15 @@ local function spawnChooser(selected)
   c:show()
 end
 
-hs.hotkey.bind({"alt"}, "R", function()
+local function main()
   hs.eventtap.keyStroke({"cmd"}, "C")
   hs.timer.doAfter(0.05, function ()
     local selected = hs.pasteboard.readString()
     spawnChooser(selected)
   end)
-end)
+end
 
+hs.eventtap.new({hs.eventtap.event.types.middleMouseUp}, function (evt)
+  hs.timer.doAfter(0.05, main)
+  return true
+end):start()
