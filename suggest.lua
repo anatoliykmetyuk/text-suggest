@@ -49,6 +49,19 @@ local function distinct(tbl, hashKey)
   return res
 end
 
+local function distinctColl(coll, hashKey)
+  local hash = {}
+  local res = collect()
+
+  coll:each(function (k, v)
+    if (not hash[hashKey(v)]) then
+      res:append(v)
+      hash[hashKey(v)] = true
+    end
+  end)
+  return res
+end
+
 local function spawnChooser(selected, allResults)
   local c = hs.chooser.new(function (sel)
     if sel ~= nil then
@@ -57,8 +70,12 @@ local function spawnChooser(selected, allResults)
     end
   end)
 
-  local function setChoices(coll)
-    c:choices(distinct(coll:all(), function (v) return v["text"] end))
+  local function suggestionHash(v) return v["text"] end
+
+  local function setChoices(coll) c:choices(coll:all()) end
+
+  local function setChoicesDistinct(coll)
+    setChoices(distinctColl(coll, suggestionHash))
   end
 
   local suggestions
@@ -69,14 +86,16 @@ local function spawnChooser(selected, allResults)
   
   local choices = mkChoices(suggestions, selected)
 
-  setChoices(choices)
+  setChoicesDistinct(choices)
   c:queryChangedCallback(function (q)
-    if string.len(q) > 0 then setChoices(choices
+    if string.len(q) > 0 then setChoices(distinctColl(choices
       :clone()
-      :filter(function (k, v) return string.match(v["text"], q) ~= nil end)
+      :filter(function (k, v)
+        return string.match(string.lower(v["text"]), string.lower(q)) ~= nil
+      end), suggestionHash)
       :prepend({ ["text"] = q, ["query"] = selected })
       :values())
-    else setChoices(choices) end
+    else setChoicesDistinct(choices) end
   end)
   c:show()
 end
