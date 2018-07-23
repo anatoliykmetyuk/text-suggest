@@ -8,15 +8,15 @@ First, install and familiarize yourself with [Hammerspoon](https://www.hammerspo
 HAMMERSPOON="~/.hammerspoon"
 
 # Install dependencies
-mkdir $HAMMERSPOON/lib
-cd $HAMMERSPOON/lib
+mkdir ~/.hammerspoon/lib
+cd ~/.hammerspoon/lib
 git clone https://github.com/kikito/inspect.lua.git inspect
 git clone https://github.com/rxi/json.lua.git json
 git clone https://github.com/ImLiam/Lua-Collections.git
 
 # Install text-suggest
-cd $HAMMERSPOON/Spoons
+cd ~/.hammerspoon/Spoons
 git clone https://github.com/anatoliykmetyuk/text-suggest.git
-cd $HAMMERSPOON
+cd ~/.hammerspoon
 echo "local ts = require(\"Spoons.text-suggest.suggest\")" >> init.lua
 ```
