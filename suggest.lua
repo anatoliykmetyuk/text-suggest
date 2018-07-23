@@ -36,11 +36,30 @@ local function mkChoices(sgs, query)
   return sgs:map(function (k, v) return k, { ["text"] = v, ["query"] = query } end):values()
 end
 
+local function distinct(tbl, hashKey)
+  local hash = {}
+  local res  = {}
+
+  for _,v in ipairs(tbl) do
+    if (not hash[hashKey(v)]) then
+      res[#res+1] = v
+      hash[hashKey(v)] = true
+    end
+  end
+  return res
+end
+
 local function spawnChooser(selected, allResults)
-  local c = hs.chooser.new(function (selected)
-    writeSuggestion(selected["query"], selected["text"])
-    hs.eventtap.keyStrokes(selected["text"])
+  local c = hs.chooser.new(function (sel)
+    if sel ~= nil then
+      writeSuggestion(sel["query"], sel["text"])
+      hs.eventtap.keyStrokes(sel["text"])
+    end
   end)
+
+  local function setChoices(coll)
+    c:choices(distinct(coll:all(), function (v) return v["text"] end))
+  end
 
   local suggestions
   if not allResults then suggestions = readSuggestions(selected)
@@ -50,14 +69,14 @@ local function spawnChooser(selected, allResults)
   
   local choices = mkChoices(suggestions, selected)
 
-  c:choices(choices:all())
+  setChoices(choices)
   c:queryChangedCallback(function (q)
-    if string.len(q) > 0 then c:choices(choices
+    if string.len(q) > 0 then setChoices(choices
       :clone()
       :filter(function (k, v) return string.match(v["text"], q) ~= nil end)
       :prepend({ ["text"] = q, ["query"] = selected })
-      :all())
-    else c:choices(choices:all()) end
+      :values())
+    else setChoices(choices) end
   end)
   c:show()
 end
@@ -76,3 +95,12 @@ hs.eventtap.new({hs.eventtap.event.types.middleMouseUp}, function (evt)
 end):start()
 
 hs.hotkey.bind({"alt"}, "R", function() main(true) end)
+
+-- local sgs = mkChoices(readAllSuggestions():map(function (k, v) return k, v["suggestion"] end):values(), "foo")
+-- local sgsTbl = sgs
+--   :clone()
+--   :prepend({ ["text"] = "Custom Stuff", ["query"] = "Custom Stuff" })
+--   :values()
+--   :all()
+
+-- print(inspect(distinct(sgsTbl, function(v) return v["text"] end)))
