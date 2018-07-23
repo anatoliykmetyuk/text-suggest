@@ -114,12 +114,3 @@ hs.eventtap.new({hs.eventtap.event.types.middleMouseUp}, function (evt)
 end):start()
 
 hs.hotkey.bind({"alt"}, "R", function() main(true) end)
-
--- local sgs = mkChoices(readAllSuggestions():map(function (k, v) return k, v["suggestion"] end):values(), "foo")
--- local sgsTbl = sgs
---   :clone()
---   :prepend({ ["text"] = "Custom Stuff", ["query"] = "Custom Stuff" })
---   :values()
---   :all()
-
--- print(inspect(distinct(sgsTbl, function(v) return v["text"] end)))
