@@ -27,28 +27,29 @@ local function writeSuggestion(wordRaw, suggestion)
     :filter(function (k, v) return not (v["word"] == word and v["suggestion"] == suggestion) end)
     :prepend({word = word, suggestion = suggestion})
 
-  local file = io.open(suggestionsFile .. ".test", "w")
+  local file = io.open(suggestionsFile, "w")
   newContent:each(function (k, v) file:write(json.encode(v) .. '\n') end)
   file:close()
 end
 
-local function mkChoices(sgs)
-  return sgs:map(function (k, v) return k, { ["text"] = v } end):values()
+local function mkChoices(sgs, query)
+  return sgs:map(function (k, v) return k, { ["text"] = v, ["query"] = query } end):values()
 end
 
 local function spawnChooser(selected)
   local c = hs.chooser.new(function (selected)
-    print(string.format('User selected: %s', selected["text"]))
+    writeSuggestion(selected["query"], selected["text"])
+    hs.eventtap.keyStrokes(selected["text"])
   end)
 
-  local choices = mkChoices(readSuggestions(selected))
+  local choices = mkChoices(readSuggestions(selected), selected)
 
   c:choices(choices:all())
   c:queryChangedCallback(function (q)
     if string.len(q) > 0 then c:choices(choices
       :clone()
       :filter(function (k, v) return string.match(v["text"], q) ~= nil end)
-      :prepend({ ["text"] = q })
+      :prepend({ ["text"] = q, ["query"] = selected })
       :all())
     else c:choices(choices:all()) end
   end)
