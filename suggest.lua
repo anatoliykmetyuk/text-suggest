@@ -36,13 +36,19 @@ local function mkChoices(sgs, query)
   return sgs:map(function (k, v) return k, { ["text"] = v, ["query"] = query } end):values()
 end
 
-local function spawnChooser(selected)
+local function spawnChooser(selected, allResults)
   local c = hs.chooser.new(function (selected)
     writeSuggestion(selected["query"], selected["text"])
     hs.eventtap.keyStrokes(selected["text"])
   end)
 
-  local choices = mkChoices(readSuggestions(selected), selected)
+  local suggestions
+  if not allResults then suggestions = readSuggestions(selected)
+  else suggestions = readAllSuggestions()
+    :map(function (k, v) return k, v["suggestion"] end):values()
+  end
+  
+  local choices = mkChoices(suggestions, selected)
 
   c:choices(choices:all())
   c:queryChangedCallback(function (q)
@@ -56,11 +62,11 @@ local function spawnChooser(selected)
   c:show()
 end
 
-local function main()
+local function main(allResults)
   hs.eventtap.keyStroke({"cmd"}, "C")
   hs.timer.doAfter(0.05, function ()
     local selected = hs.pasteboard.readString()
-    spawnChooser(selected)
+    spawnChooser(selected, allResults)
   end)
 end
 
@@ -68,3 +74,5 @@ hs.eventtap.new({hs.eventtap.event.types.middleMouseUp}, function (evt)
   hs.timer.doAfter(0.05, main)
   return true
 end):start()
+
+hs.hotkey.bind({"alt"}, "R", function() main(true) end)
