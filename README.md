@@ -4,6 +4,7 @@
 3. You can use keyboard modifiers keys together with the middle mouse button.
     1. **Cmd**: The middle mouse key displays the replacements you previously made for the currently selected text only. Not for the other texts you replaced. To display all replacement suggestions, press Cmd together with the middle mouse button.
     2. **Alt**: If you want the selected text to be entered into the selector query by default, hold Alt when pressing MMB.
+    3. **Ctrl**: If you don't want to replace an existing word but to insert a word (that is, you haven't selected anything), hold Ctrl when pressing MMB.
 
 Note that the most recent replacements are always displayed on top.
 

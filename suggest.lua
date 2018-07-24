@@ -3,6 +3,7 @@ local inspect     = require("lib.inspect.inspect")
 local json        = require("lib.json.json")
 
 local suggestionsFile = "suggest.json"
+local insertHash      = "e0df5f3dfd2650ae5be9993434e2b2c0"  -- MD5 of the word "insert"
 
 local function readAllSuggestions()
   local file = io.open(suggestionsFile, "r")
@@ -104,17 +105,18 @@ local function spawnChooser(selected, allResults, displayQuery)
   c:show()
 end
 
-local function main(allResults, displayQuery)
-  hs.eventtap.keyStroke({"cmd"}, "C")
+local function main(allResults, displayQuery, dontCopy)
+  if not dontCopy then hs.eventtap.keyStroke({"cmd"}, "C") end
   hs.timer.doAfter(0.05, function ()
-    local selected = hs.pasteboard.readString()
+    local selected
+    if not dontCopy then selected = hs.pasteboard.readString() else selected = insertHash end
     spawnChooser(selected, allResults, displayQuery)
   end)
 end
 
 local suggestTap = hs.eventtap.new({hs.eventtap.event.types.middleMouseUp}, function (evt)
   flags = evt:getFlags()
-  hs.timer.doAfter(0.05, function () main(flags["cmd"], flags["alt"]) end)
+  hs.timer.doAfter(0.05, function () main(flags["cmd"], flags["alt"], flags["ctrl"]) end)
   return true
 end)
 
