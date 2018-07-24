@@ -62,7 +62,7 @@ local function distinctColl(coll, hashKey)
   return res
 end
 
-local function spawnChooser(selected, allResults)
+local function spawnChooser(selected, allResults, displayQuery)
   local c = hs.chooser.new(function (sel)
     if sel ~= nil then
       writeSuggestion(sel["query"], sel["text"])
@@ -97,20 +97,33 @@ local function spawnChooser(selected, allResults)
       :values())
     else setChoicesDistinct(choices) end
   end)
+
+  if displayQuery then
+    c:query(selected)
+  end
   c:show()
 end
 
-local function main(allResults)
+local function main(allResults, displayQuery)
   hs.eventtap.keyStroke({"cmd"}, "C")
   hs.timer.doAfter(0.05, function ()
     local selected = hs.pasteboard.readString()
-    spawnChooser(selected, allResults)
+    spawnChooser(selected, allResults, displayQuery)
   end)
 end
 
-hs.eventtap.new({hs.eventtap.event.types.middleMouseUp}, function (evt)
-  hs.timer.doAfter(0.05, main)
+local suggestTap = hs.eventtap.new({hs.eventtap.event.types.middleMouseUp}, function (evt)
+  flags = evt:getFlags()
+  hs.timer.doAfter(0.05, function () main(flags["cmd"], flags["alt"]) end)
   return true
-end):start()
+end)
 
-hs.hotkey.bind({"alt"}, "R", function() main(true) end)
+hs.hotkey.bind({"alt"}, "r", function()
+  if not suggestTap:isEnabled() then
+    suggestTap:start()
+    hs.alert.show("Suggest Mode started")
+  else
+    suggestTap:stop()
+    hs.alert.show("Suggest Mode stopped")
+  end
+end)
